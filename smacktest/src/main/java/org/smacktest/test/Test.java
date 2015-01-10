@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.Presence.Type;
 import org.smacktest.core.Connection;
 
 public class Test {
@@ -15,6 +16,7 @@ public class Test {
 	private static String SERVICE_NAME;
 	private static String WINDOWS_USER;
 	private static String LINUX_USER;
+	private static String MAC_USER;
 	
 	public static void main(String[] args) {
 		
@@ -25,11 +27,8 @@ public class Test {
 		
 		connection.login(USERNAME, PASSWORD);
 		
-		
-		
-		Presence presencePacket = new Presence(Presence.Type.subscribe);
-		presencePacket.setTo(getJID(WINDOWS_USER));
-		connection.sendPacket(presencePacket);
+		sendPresence(connection, LINUX_USER, Presence.Type.subscribe);
+		sendPresence(connection, MAC_USER, Presence.Type.subscribe);
 		
 		
 		int ch = ' ';
@@ -39,15 +38,14 @@ public class Test {
 				if(ch == 'L' || ch == 'l')
 					connection.publishPEP();
 				else if(ch == 'M' || ch == 'm')
-					connection.sendMessage(getJID(WINDOWS_USER), "Linux Message...");
+					connection.sendMessage(getJID(LINUX_USER), "Windows Message...");
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		} 
 		
-		presencePacket = new Presence(Presence.Type.unsubscribe);
-		presencePacket.setTo(getJID(WINDOWS_USER));
-		connection.sendPacket(presencePacket);
+		sendPresence(connection, LINUX_USER, Presence.Type.unsubscribe);
+		sendPresence(connection, MAC_USER, Presence.Type.unsubscribe);
 		System.out.println("Disconnecting...");
 		connection.disconnect();
 		
@@ -55,6 +53,12 @@ public class Test {
 	
 	private static String getJID(String user) {
 		return user + "@" + SERVICE_NAME;
+	}
+	
+	private static void sendPresence(Connection conn, String user, Type type) {
+		Presence presencePacket = new Presence(type);
+		presencePacket.setTo(getJID(user));
+		conn.sendPacket(presencePacket);
 	}
 	
 	private void getProperties() {
@@ -71,7 +75,7 @@ public class Test {
 		SERVICE_NAME = properties.getProperty("serviceName");
 		WINDOWS_USER = properties.getProperty("windowsUser");
 		LINUX_USER = properties.getProperty("linuxUser");
-		
+		MAC_USER = properties.getProperty("macUser");
 	}
 
 }
